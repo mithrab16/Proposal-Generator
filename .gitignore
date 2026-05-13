@@ -1,6 +1,6 @@
 venv/
 venv312/
 __pycache__/
-.vscode/
-proposals/
 *.pyc
+proposals/
+.vscode/
