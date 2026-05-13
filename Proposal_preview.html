@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+/* ── Reset ───────────────────────────────────── */
+* {{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}}
+
+body {{
+  background: #eef0f4;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111;
+  padding: 40px 20px 60px;
+}}
+
+/* ── Paper card ──────────────────────────────── */
+.page {{
+  background: #ffffff;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 72px 72px;
+  box-shadow: 0 10px 48px rgba(0,0,0,0.16);
+}}
+
+/* ── Top meta row ────────────────────────────── */
+.top-meta {{
+  overflow: hidden;
+  margin-bottom: 8px;
+}}
+.page-label {{
+  float: right;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+  text-transform: uppercase;
+}}
+
+/* ── Short decorative rule ───────────────────── */
+.top-rule {{
+  width: 52px;
+  height: 3px;
+  background: #0a0a0a;
+  margin-bottom: 28px;
+}}
+
+/* ── Logo row ────────────────────────────────── */
+.logo-row {{
+  margin-bottom: 18px;
+}}
+.logo-row img {{
+  height: 80px;
+  width: auto;
+  display: block;
+}}
+
+/* ── Giant heading ───────────────────────────── */
+.proposal-title {{
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -2px;
+  color: #0a0a0a;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-bottom: 28px;
+}}
+
+/* ── Header info row ─────────────────────────── */
+.header-row {{
+  overflow: hidden;
+  margin-bottom: 28px;
+}}
+.prepared-for {{
+  float: left;
+  width: 60%;
+}}
+.prepared-for .label {{
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}}
+.prepared-for .client-name {{
+  font-size: 28px;
+  font-weight: 700;
+  color: #0a0a0a;
+}}
+.date-block {{
+  float: right;
+  text-align: right;
+}}
+.date-block .label {{
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}}
+.date-block .date-value {{
+  font-size: 14px;
+  color: #333;
+}}
+
+/* ── Divider ─────────────────────────────────── */
+.divider {{
+  border: none;
+  border-top: 1.5px solid #e0e0e0;
+  margin: 28px 0;
+  clear: both;
+}}
+
+/* ── Section heading with left accent ───────── */
+.section-heading {{
+  font-size: 18px;
+  font-weight: 700;
+  color: #0a0a0a;
+  border-left: 4px solid #0a0a0a;
+  padding-left: 14px;
+  margin-bottom: 14px;
+  letter-spacing: 0.2px;
+}}
+
+/* ── Overview text ───────────────────────────── */
+.overview-text {{
+  font-size: 14px;
+  line-height: 1.8;
+  color: #444;
+  margin-bottom: 6px;
+}}
+
+/* ── Two-column scope ────────────────────────── */
+.scope-columns {{
+  overflow: hidden;
+  margin-top: 10px;
+}}
+.scope-col {{
+  float: left;
+  width: 48%;
+  margin-right: 4%;
+}}
+.scope-col:last-child {{
+  margin-right: 0;
+}}
+.col-label {{
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}}
+.deliverables-list {{
+  list-style: none;
+  padding: 0;
+}}
+.deliverables-list li {{
+  font-size: 13px;
+  color: #333;
+  padding: 6px 0;
+  border-bottom: 1px solid #f2f2f2;
+}}
+.deliverables-list li:before {{
+  content: "\2014\00a0";
+  color: #bbb;
+}}
+
+/* ── Investment block ────────────────────────── */
+.invest-item {{
+  margin-bottom: 18px;
+}}
+.invest-label {{
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}}
+.invest-value {{
+  font-size: 15px;
+  font-weight: 700;
+  color: #0a0a0a;
+}}
+.invest-value.large {{
+  font-size: 22px;
+}}
+
+/* ── Signature section ───────────────────────── */
+.sig-columns {{
+  overflow: hidden;
+  margin-top: 10px;
+}}
+.sig-col {{
+  float: left;
+  width: 48%;
+  margin-right: 4%;
+}}
+.sig-col:last-child {{
+  margin-right: 0;
+}}
+.sig-italic {{
+  font-style: italic;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 20px;
+  font-family: Georgia, serif;
+}}
+.sig-line {{
+  border-top: 1.5px solid #222;
+  margin-bottom: 8px;
+}}
+.sig-label {{
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}}
+.sig-name {{
+  font-size: 14px;
+  font-weight: 700;
+  color: #0a0a0a;
+}}
+
+/* ── Footer ──────────────────────────────────── */
+.footer {{
+  overflow: hidden;
+  margin-top: 48px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
+  clear: both;
+}}
+.footer .left {{
+  float: left;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #ccc;
+  text-transform: uppercase;
+}}
+.footer .right {{
+  float: right;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #ccc;
+  text-transform: uppercase;
+}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Page label -->
+  <div class="top-meta">
+    <span class="page-label">PAGE 01 / 04</span>
+  </div>
+
+  <!-- Short decorative rule -->
+  <div class="top-rule"></div>
+
+  <!-- Logo (only rendered when logo_html is not empty) -->
+  {logo_html}
+
+  <!-- Giant heading -->
+  <div class="proposal-title">PROJECT<br>PROPOSAL</div>
+
+  <!-- Prepared for + Date -->
+  <div class="header-row">
+    <div class="prepared-for">
+      <div class="label">Prepared For</div>
+      <div class="client-name">{name}</div>
+    </div>
+    <div class="date-block">
+      <div class="label">Date</div>
+      <div class="date-value">{date}</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Overview -->
+  <div class="section-heading">Overview</div>
+  <p class="overview-text">{overview}</p>
+
+  <hr class="divider">
+
+  <!-- Scope of Work -->
+  <div class="section-heading">Scope of Work</div>
+  <div class="scope-columns">
+
+    <div class="scope-col">
+      <div class="col-label">Core Deliverables</div>
+      <ul class="deliverables-list">
+        {deliverables}
+      </ul>
+    </div>
+
+    <div class="scope-col">
+      <div class="col-label">Timeline &amp; Investment</div>
+
+      <div class="invest-item">
+        <div class="invest-label">Estimated Completion</div>
+        <div class="invest-value">{timeline}</div>
+      </div>
+
+      <div class="invest-item">
+        <div class="invest-label">Total Project Value</div>
+        <div class="invest-value large">&#8377; {budget}</div>
+      </div>
+
+      <div class="invest-item">
+        <div class="invest-label">Price Range</div>
+        <div class="invest-value">&#8377; {price_range}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="divider">
+
+  <!-- Signature section -->
+  <div class="sig-columns">
+
+    <div class="sig-col">
+      <p class="sig-italic">Digital Signature Recorded</p>
+      <div class="sig-line"></div>
+      <div class="sig-label">Consultant Signature</div>
+      <div class="sig-name">Lead Creative Director</div>
+    </div>
+
+    <div class="sig-col">
+      <p class="sig-italic">Digital Signature Recorded</p>
+      <div class="sig-line"></div>
+      <div class="sig-label">Client Authorization</div>
+      <div class="sig-name">Authorized Representative</div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="left">Folio Editor &copy; 2025</span>
+    <span class="right">Confidential Document</span>
+  </div>
+
+</div>
+</body>
+</html>

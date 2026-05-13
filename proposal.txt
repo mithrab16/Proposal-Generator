@@ -1,0 +1,20 @@
+
+            
+    CLIENT PROPOSAL
+    ----------
+
+    Client Name: & "d:/Machine learning/Proposal Generation/venv/Scripts/python.exe" "d:/Machine learning/Proposal Generation/Main.py",        
+    Project Name: mithra,
+    Description: Development of a responsive website for the client.
+    Deliverables: Design mockups,Frontend development,Backend development,Testing and deployment
+    Timeline: 2 weeks,
+    Budget: 34555
+    From Team : we have dicussed the project requirements and we are confident that we can deliver a high quality website within the short timeline. but
+    the budget is a bit tight, we can work with you to find cost-effective solutions and ensure that the project is completed within the allocated budget.
+
+    ----------
+
+    Thank you for Choosing us
+
+    --------
+    

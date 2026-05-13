@@ -1,0 +1,103 @@
+#custom pdf creation 
+
+    </div>
+def save_pdf(html,client):
+    os.makedirs("proposals", exist_ok=True)
+    file_path = f"proposals/{client['Name']}_proposal.pdf"
+    c = canvas.Canvas(file_path)
+    y=800
+
+    #title
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(180, y, "CLIENT PROPOSAL")
+
+    y-=40
+
+    #Date
+    c.setFont("Helvetica", 12)
+    c.drawString(50, y, f'Date:{datetime.now().strftime("%d-%m-%y")}')
+
+    y-=20
+    c.setFont("Helvetica-Bold", 11)
+
+    #Client Details
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Client Details")
+
+    y-=25
+    c.setFont("Helvetica", 11)
+
+    c.drawString(60, y, f"Client:{client['Name']}")
+    y-=20
+    c.drawString(60, y, f"Project Type: {client['Project Type']}")
+    y-=20
+    c.drawString(60, y, f"Timeline: {client['Timeline']}")
+    y-=20
+    c.drawString(60, y, f"Budget: Rs.{client['Budget']}")
+    y-=40
+
+    #Deliverables
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Deliverables")
+
+    y-=25
+    c.setFont("Helvetica", 11)
+
+    for item in Deliverables[client['Project Type']]:
+        c.drawString(50, y, f".{item}")
+        y-=20
+
+    y-=20
+
+    #Price Range
+    min_price, max_price = pricing[client["Project Type"]]
+
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Our Price Range")
+
+    y-=25
+    c.setFont("Helvetica", 12)
+    c.drawString(70, y, f"Rs.{min_price} - Rs.{max_price}")
+
+    y-=40
+
+    #overview
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Project Overview")
+
+    y-=25
+    c.setFont("Helvetica", 11)
+    c.drawString(70, y, "We have carefully reviewed your requirements and are confident ")
+
+    y-=20
+    c.drawString(70, y, "aligned with your business goals.")
+
+    y-=40
+
+    #closing note
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Closing Note")
+
+    y-=25
+    c.setFont("Helvetica", 11)
+
+    c.drawString(70, y, "Thank you for considering our services. We look forward to collaborating with you.")
+
+    y-=20
+
+    c.drawString(70, y, "We look forward to collaborating with you." )
+
+    c.save()
+    return file_path
+
+
+
+    #xhtml2pdf
+    def save_pdf(html,client):
+    os.makedirs("proposals", exist_ok=True)
+    
+    file_path = f"proposals/{client['Name']}_proposal.pdf"
+    
+    with open(file_path, "wb")as pdf_file:
+        pisa.CreatePDF(html, dest=pdf_file)
+    
