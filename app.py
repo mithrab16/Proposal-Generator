@@ -1,9 +1,9 @@
 """
-app.py  —  Folio Editor
------------------------
-Streamlit UI: dark navy sidebar + white paper preview panel.
+app.py  —  POPS Smart Proposal Automation
+-----------------------------------------
+Streamlit entry point for Streamlit Cloud deployment.
 
-HOW TO RUN:
+HOW TO RUN LOCALLY:
     streamlit run app.py
 """
 
@@ -18,13 +18,17 @@ from proposal_engine import Deliverables, pricing, save_pdf
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PAGE CONFIG  (must be the very first Streamlit call)
+# PAGE CONFIG  — must be the very first Streamlit call
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Folio Editor",
+    page_title="POPS — Smart Proposal Automation",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# Absolute path to the directory containing app.py
+# Using this ensures file reads work on Streamlit Cloud too
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -32,15 +36,12 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── Sidebar ──────────────────────────────────────── */
 [data-testid="stSidebar"] {
     background-color: #1a1f2e !important;
 }
 [data-testid="stSidebar"] * {
     color: #ffffff !important;
 }
-
-/* Input fields inside sidebar */
 [data-testid="stSidebar"] input,
 [data-testid="stSidebar"] textarea {
     background-color: #252b3b !important;
@@ -57,8 +58,6 @@ st.markdown("""
     background-color: #252b3b !important;
     color: #ffffff !important;
 }
-
-/* Labels */
 [data-testid="stSidebar"] label {
     font-size: 11px !important;
     letter-spacing: 1.5px !important;
@@ -66,15 +65,11 @@ st.markdown("""
     color: #8892a4 !important;
     font-weight: 600 !important;
 }
-
-/* File uploader area */
 [data-testid="stSidebar"] [data-testid="stFileUploader"] {
     background-color: #252b3b !important;
     border: 1px dashed #3a4155 !important;
     border-radius: 6px !important;
 }
-
-/* Orange Preview Mode button */
 [data-testid="stSidebar"] .stButton > button {
     background-color: #ff6b2b !important;
     color: #ffffff !important;
@@ -90,15 +85,11 @@ st.markdown("""
 [data-testid="stSidebar"] .stButton > button:hover {
     background-color: #e55a1f !important;
 }
-
-/* ── Main area ────────────────────────────────────── */
 .block-container {
     padding-top: 0 !important;
     padding-left: 1.5rem !important;
     padding-right: 1.5rem !important;
 }
-
-/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -116,8 +107,6 @@ st.markdown("""
     letter-spacing: 0.5px;
 }
 .navbar-links a:hover { color: #111; }
-
-/* Nav items in sidebar */
 .nav-item {
     display: flex;
     align-items: center;
@@ -131,15 +120,11 @@ st.markdown("""
 }
 .nav-item.active { background: #252b3b; color: #ffffff; }
 .nav-icon { font-size: 15px; }
-
-/* Sidebar divider */
 .sidebar-divider {
     border: none;
     border-top: 1px solid #2e3447;
     margin: 16px 0;
 }
-
-/* Empty state */
 .empty-hint {
     display: flex;
     flex-direction: column;
@@ -160,13 +145,11 @@ st.markdown("""
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SESSION STATE
-# WHY: Streamlit reruns the whole script on every interaction.
-#      session_state keeps the generated preview + PDF alive between reruns.
 # ─────────────────────────────────────────────────────────────────────────────
 for key, default in [
-    ("html_filled",  None),
-    ("pdf_path",     None),
-    ("client_name",  ""),
+    ("html_filled", None),
+    ("pdf_path",    None),
+    ("client_name", ""),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -177,37 +160,32 @@ for key, default in [
 # ─────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
 
-    # App name
-    st.markdown("## 📄 Folio Editor")
     st.markdown(
-        "<p style='font-size:12px;color:#8892a4;margin-top:-8px;'>"
-        "Professional Proposal Builder</p>",
+        "<div style='text-align:center;padding:8px 0 4px;'>"
+        "<span style='font-size:22px;font-weight:900;color:#4f46e5;'>"
+        "&#9679; POPS</span><br>"
+        "<span style='font-size:11px;color:#8892a4;letter-spacing:1px;'>"
+        "SMART PROPOSAL AUTOMATION</span>"
+        "</div>",
         unsafe_allow_html=True,
     )
     st.markdown("<hr class='sidebar-divider'>", unsafe_allow_html=True)
 
-    # ── Inputs ────────────────────────────────────
-    name              = st.text_input("Client Name",  placeholder="e.g. unaku pudicha name")
-    project_type      = st.selectbox("Project Type",  ["website", "web application", "mobile app", "crm"])
-    timeline          = st.text_input("Timeline",     placeholder="e.g. 3 months")
-    pricing_input     = st.text_input("Pricing (₹)",  placeholder="e.g. 75,000")
-    deliverables_custom = st.text_area(
-        "Custom Deliverables (optional)",
-        placeholder="One item per line\nLeave blank to use defaults",
-        height=100,
-    )
+    name          = st.text_input("Client Name",  placeholder="e.g. Dharani")
+    project_type  = st.selectbox("Project Type",  list(Deliverables.keys()), format_func=str.title)
+    timeline      = st.text_input("Timeline",     placeholder="e.g. 3 months")
+    pricing_input = st.text_input("Pricing (Rs)", placeholder="e.g. 75,000")
 
-    # ── Logo upload ───────────────────────────────
     st.markdown("<hr class='sidebar-divider'>", unsafe_allow_html=True)
+
     logo_file = st.file_uploader(
         "Company Logo (optional)",
-        type=["png", "jpg", "jpeg", "svg"],
-        help="Appears in the proposal header at 80px height",
+        type=["png", "jpg", "jpeg"],
+        help="Shown at the top of the proposal",
     )
 
     st.markdown("<hr class='sidebar-divider'>", unsafe_allow_html=True)
 
-    # ── Nav items ─────────────────────────────────
     st.markdown("""
     <div class="nav-item active">
         <span class="nav-icon">👤</span> Client Details
@@ -222,7 +200,6 @@ with st.sidebar:
 
     st.markdown("<hr class='sidebar-divider'>", unsafe_allow_html=True)
 
-    # ── Generate button ───────────────────────────
     generate = st.button("▶  Preview Mode", use_container_width=True)
 
 
@@ -236,12 +213,12 @@ if generate:
     if not name.strip():          errors.append("Client Name is required.")
     if not timeline.strip():      errors.append("Timeline is required.")
     if not pricing_input.strip(): errors.append("Pricing is required.")
-    for e in errors:
-        st.sidebar.error(e)
+    for err in errors:
+        st.sidebar.error(err)
     if errors:
         st.stop()
 
-    # Client dict
+    # Client dictionary
     client = {
         "Name":         name.strip(),
         "Project Type": project_type,
@@ -249,46 +226,36 @@ if generate:
         "Timeline":     timeline.strip(),
     }
 
-    # Deliverables list
-    if deliverables_custom.strip():
-        items = [l.strip() for l in deliverables_custom.splitlines() if l.strip()]
-    else:
-        items = Deliverables[project_type]
-
+    # Deliverables HTML
+    items             = Deliverables[project_type]
     deliverables_html = "\n".join(f"<li>{item}</li>" for item in items)
 
     # Price range
-    mn, mx = pricing.get(project_type, ("N/A", "N/A"))
+    mn, mx          = pricing.get(project_type, ("N/A", "N/A"))
     price_range_str = f"{mn} \u2013 {mx}"
 
-    # ── Logo handling ──────────────────────────────
-    # WHY base64?
-    #   The HTML preview runs inside an iframe (components.html).
-    #   External file paths don't work there. Embedding the image
-    #   as a base64 data-URI makes it self-contained — works in
-    #   both the browser iframe AND the reportlab PDF.
+    # Logo → base64 data-URI (works inside components.html iframe)
     logo_bytes = None
-    logo_html  = ""          # empty string → placeholder renders nothing
+    logo_html  = ""
 
     if logo_file is not None:
         logo_bytes = logo_file.read()
-        # Detect MIME type from file extension
         ext  = logo_file.name.rsplit(".", 1)[-1].lower()
         mime = {"jpg": "image/jpeg", "jpeg": "image/jpeg",
-                "png": "image/png",  "svg": "image/svg+xml"}.get(ext, "image/png")
-        b64  = base64.b64encode(logo_bytes).decode("utf-8")
+                "png": "image/png"}.get(ext, "image/png")
+        b64       = base64.b64encode(logo_bytes).decode("utf-8")
         logo_html = (
             f'<div class="logo-row">'
             f'<img src="data:{mime};base64,{b64}" alt="logo">'
             f'</div>'
         )
 
-    # ── Fill HTML template ─────────────────────────
-    template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "Proposal_preview.html")
+    # Load HTML template using absolute path
+    template_path = os.path.join(BASE_DIR, "Proposal_preview.html")
     with open(template_path, "r", encoding="utf-8") as f:
         tmpl = f.read()
 
+    # Fill all placeholders — must match exactly what the template expects
     html_filled = tmpl.format(
         logo_html    = logo_html,
         name         = client["Name"],
@@ -305,23 +272,19 @@ if generate:
         price_range  = price_range_str,
     )
 
-    # ── Generate PDF ───────────────────────────────
-    # save_pdf() uses reportlab — no external dependencies needed.
-    # logo_bytes is passed separately so reportlab can embed the image
-    # directly (base64 strings don't work in reportlab Image).
+    # Generate PDF with reportlab
     pdf_path = save_pdf(client, logo_bytes=logo_bytes)
 
-    # Persist to session state
+    # Persist across reruns
     st.session_state.html_filled = html_filled
     st.session_state.pdf_path    = pdf_path
     st.session_state.client_name = client["Name"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MAIN AREA — navbar + preview
+# MAIN AREA
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Navbar
 st.markdown("""
 <div class="navbar">
     <div class="navbar-links">
@@ -332,7 +295,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# PDF download button (top-right, only when a PDF exists)
+# Download PDF button — only shown after generation
 if st.session_state.pdf_path and os.path.exists(st.session_state.pdf_path):
     _, btn_col = st.columns([6, 1])
     with btn_col:
@@ -345,13 +308,14 @@ if st.session_state.pdf_path and os.path.exists(st.session_state.pdf_path):
                 use_container_width=True,
             )
 
-# Preview panel
+# Proposal preview
 if st.session_state.html_filled:
     components.html(st.session_state.html_filled, height=1150, scrolling=True)
 else:
     st.markdown("""
     <div class="empty-hint">
         <span class="big-icon">📄</span>
-        <span>Fill in the details on the left and click <strong>▶ Preview Mode</strong></span>
+        <span>Fill in the details on the left and click
+              <strong>&#9654; Preview Mode</strong></span>
     </div>
     """, unsafe_allow_html=True)

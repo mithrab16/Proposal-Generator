@@ -1,6 +1,11 @@
 venv/
 venv312/
 __pycache__/
-*.pyc
 proposals/
 .vscode/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+dist/
+build/

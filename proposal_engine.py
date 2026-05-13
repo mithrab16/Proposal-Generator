@@ -1,72 +1,78 @@
 """
-proposal_engine.py
-------------------
-Data dictionaries + PDF generation (reportlab Platypus).
-DOCX generation removed per spec.
+proposal_engine.py  —  POPS / Folio Editor
+-------------------------------------------
+Data dictionaries + PDF generation.
+
+PDF library: reportlab (pure-Python, no system dependencies).
+Works on Streamlit Cloud, Windows, Linux, macOS without any
+extra system packages.
+
+NOTE: xhtml2pdf was evaluated but its python-bidi dependency
+requires a Rust compiler to build on Python 3.12, which is not
+available on Streamlit Cloud. reportlab is used instead.
 """
 
 import os
-import base64
 from io import BytesIO
 from datetime import datetime
 
+# ── reportlab — the only PDF library used ────────────────────────────────────
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, HRFlowable,
-    Table, TableStyle, Image as RLImage,
-)
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    HRFlowable,
+    Table,
+    TableStyle,
+    Image as RLImage,
+)
 
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 # DATA
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 
 Deliverables = {
     "website": [
-        "UX/UI Design File",
-        "Frontend Development",
-        "Backend Development",
-        "Testing and Deployment",
-        "Client Handoff",
-        "3 Months of Support",
+        "Discovery & Strategy",
+        "UX Research",
+        "UI Design System",
+        "Responsive Frontend Development",
+        "Backend Integration",
+        "QA Testing",
+        "Deployment",
+        "Post-launch Support",
     ],
     "web application": [
-        "UX Research & Analysis",
-        "Information Architecture",
-        "UX Wireframing",
-        "UI Design",
-        "Prototyping",
-        "Frontend Development",
-        "Backend Development",
-        "Testing and Deployment",
+        "Product Architecture",
+        "Dashboard Design",
+        "Authentication System",
+        "API Development",
+        "Database Integration",
+        "Testing",
+        "Deployment",
     ],
     "mobile app": [
-        "UX Research & Analysis",
-        "Information Architecture",
-        "UX Wireframing",
-        "UI Design",
-        "Prototyping",
-        "Frontend Development",
-        "Backend Development",
-        "Testing and Deployment",
+        "App Flow Mapping",
+        "UI/UX Design",
+        "Native Development",
+        "API Integration",
+        "Performance Optimization",
+        "App Deployment",
     ],
     "crm": [
-        "Idea Generation",
-        "Requirement Gathering",
-        "System Design",
-        "Development",
-        "Testing and Deployment",
+        "Workflow Planning",
+        "Database Structure",
+        "Admin Dashboard",
+        "User Roles & Permissions",
+        "Automation Logic",
+        "Reporting System",
+        "Deployment",
     ],
-}
-
-description = {
-    "website":         "Development of a responsive website tailored to the client's brand and goals.",
-    "web application": "Development of a full-featured web application for the client.",
-    "mobile app":      "Development of a cross-platform mobile application for the client.",
-    "crm":             "Development of a custom CRM system to streamline client operations.",
 }
 
 pricing = {
@@ -76,14 +82,27 @@ pricing = {
     "crm":             ("2,00,000", "10,00,000"),
 }
 
+description = {
+    "website":         "a responsive, high-performance website",
+    "web application": "a full-featured, scalable web application",
+    "mobile app":      "a cross-platform mobile application",
+    "crm":             "a custom CRM system",
+}
 
-# ─────────────────────────────────────────────
-# save_pdf — Folio Editor style via reportlab
-# ─────────────────────────────────────────────
+CLOSING_NOTE = (
+    "Thank you for considering us as your digital transformation partner. "
+    "We are committed to delivering scalable, impactful solutions designed "
+    "for long-term growth."
+)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# save_pdf
+# ─────────────────────────────────────────────────────────────────────────────
 
 def save_pdf(client, logo_bytes=None):
     """
-    Build a Folio-Editor-style PDF with reportlab Platypus.
+    Generate a professional proposal PDF with reportlab Platypus.
 
     Parameters
     ----------
@@ -92,22 +111,33 @@ def save_pdf(client, logo_bytes=None):
 
     Returns
     -------
-    str  Path to the saved PDF file
+    str  Absolute path to the saved PDF file
     """
     os.makedirs("proposals", exist_ok=True)
-    path    = f"proposals/{client['Name']}_proposal.pdf"
-    project = client["Project Type"]
-    W, H    = A4          # 595 x 842 pt
-    M       = 18 * mm     # page margin
-    IW      = W - 2 * M   # inner (usable) width
 
-    # ── Colours ─────────────────────────────────
-    BLACK = colors.HexColor("#0a0a0a")
-    GREY  = colors.HexColor("#999999")
-    LGREY = colors.HexColor("#dddddd")
-    DARK  = colors.HexColor("#444444")
+    client_name  = client.get("Name", "proposal")
+    project_type = client.get("Project Type", "website")
+    timeline     = client.get("Timeline", "")
+    budget       = client.get("Budget", "")
 
-    # ── Style factory ───────────────────────────
+    # Use absolute path so it works regardless of working directory
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    pdf_path = os.path.join(base_dir, "proposals", f"{client_name}_proposal.pdf")
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+
+    W, H = A4           # 595 × 842 pt
+    M    = 20 * mm      # page margin
+    IW   = W - 2 * M    # inner width ≈ 515 pt
+
+    # ── Colours ──────────────────────────────────
+    BLACK    = colors.HexColor("#0d0d0d")
+    ACCENT   = colors.HexColor("#4f46e5")
+    GREY     = colors.HexColor("#888888")
+    LGREY    = colors.HexColor("#e0e0e0")
+    DARK     = colors.HexColor("#333333")
+    PRICE_BG = colors.HexColor("#f5f3ff")
+
+    # ── Style factory ─────────────────────────────
     def S(name, font="Helvetica", size=11, color=BLACK,
           leading=None, sb=0, sa=4, align=TA_LEFT, bold=False):
         return ParagraphStyle(
@@ -115,44 +145,46 @@ def save_pdf(client, logo_bytes=None):
             fontName    = font + ("-Bold" if bold else ""),
             fontSize    = size,
             textColor   = color,
-            leading     = leading or size * 1.45,
+            leading     = leading or size * 1.5,
             spaceBefore = sb,
             spaceAfter  = sa,
             alignment   = align,
         )
 
-    # Define all styles
-    sPageLabel  = S("pl",   size=8,  color=GREY,  align=TA_RIGHT)
-    sTitle      = S("ti",   size=40, bold=True, leading=44, sb=4, sa=14)
-    sPrepLabel  = S("prl",  size=8,  color=GREY)
-    sClientName = S("cn",   size=22, bold=True, sa=6)
-    sDateLabel  = S("dl",   size=8,  color=GREY,  align=TA_RIGHT)
-    sDateVal    = S("dv",   size=11, align=TA_RIGHT)
-    sSecHead    = S("sh",   size=14, bold=True, sb=8, sa=6)
-    sBody       = S("bo",   size=11, color=DARK, leading=17, sa=4)
-    sColLabel   = S("cl",   size=8,  color=GREY, sa=5)
-    sDeliv      = S("de",   size=11, sa=3)
-    sInvLbl     = S("il",   size=8,  color=GREY, sa=2)
-    sInvVal     = S("iv",   size=13, bold=True, sa=8)
-    sInvBig     = S("ib",   size=18, bold=True, sa=8)
-    sSigItalic  = S("si",   size=11, color=colors.HexColor("#555555"), sa=12)
-    sSigLabel   = S("sl",   size=8,  color=GREY, sa=2)
-    sSigName    = S("sn",   size=12, bold=True)
-    sFooter     = S("fl",   size=8,  color=colors.HexColor("#bbbbbb"))
-    sFooterR    = S("fr",   size=8,  color=colors.HexColor("#bbbbbb"), align=TA_RIGHT)
+    sBrandName  = S("bn",  size=24, color=ACCENT, bold=True,  align=TA_LEFT, sa=2)
+    sBrandSub   = S("bs",  size=9,  color=GREY,   align=TA_LEFT, sa=0)
+    sDate       = S("dt",  size=10, color=GREY,   align=TA_RIGHT)
+    sTitle      = S("ti",  size=36, bold=True, leading=40, sb=6, sa=12)
+    sSecHead    = S("sh",  size=13, bold=True, color=BLACK, sb=8, sa=5)
+    sBody       = S("bo",  size=11, color=DARK, leading=17, sa=4)
+    sColLabel   = S("cl",  size=8,  color=GREY, sa=5)
+    sDeliv      = S("de",  size=11, color=DARK, sa=3)
+    sInvLabel   = S("il",  size=8,  color=GREY, sa=2)
+    sInvVal     = S("iv",  size=13, bold=True, sa=6)
+    sInvRange   = S("ir",  size=16, bold=True, color=ACCENT, sa=0)
+    sSigItalic  = S("si",  size=10, color=GREY, sa=10)
+    sSigLabel   = S("sl",  size=8,  color=GREY, sa=2)
+    sSigName    = S("sn",  size=11, bold=True)
+    sFooterL    = S("fl",  size=8,  color=GREY)
+    sFooterR    = S("fr",  size=8,  color=GREY, align=TA_RIGHT)
+    sClosing    = S("cn",  size=11, color=DARK, leading=17, sa=4)
 
-    # ── Helper flowables ────────────────────────
-    def hr(clr=LGREY, thick=1):
-        return HRFlowable(width="100%", thickness=thick,
-                          color=clr, spaceBefore=4, spaceAfter=10)
+    # ── Helpers ───────────────────────────────────
+    def hr(clr=LGREY, thick=0.75, sb=4, sa=10):
+        return HRFlowable(
+            width="100%", thickness=thick,
+            color=clr, spaceBefore=sb, spaceAfter=sa,
+        )
 
     def section_heading(text):
-        """4pt black left-bar accent + bold heading text."""
-        BAR_W, GAP_W = 5, 10
-        t = Table([["", "", Paragraph(text, sSecHead)]],
-                  colWidths=[BAR_W, GAP_W, IW - BAR_W - GAP_W])
+        """Indigo 4pt left-bar + bold heading."""
+        BAR_W, GAP_W = 4, 10
+        t = Table(
+            [["", "", Paragraph(text, sSecHead)]],
+            colWidths=[BAR_W, GAP_W, IW - BAR_W - GAP_W],
+        )
         t.setStyle(TableStyle([
-            ("BACKGROUND",    (0, 0), (0, 0), BLACK),
+            ("BACKGROUND",    (0, 0), (0, 0), ACCENT),
             ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
             ("TOPPADDING",    (0, 0), (-1, -1), 4),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
@@ -161,89 +193,85 @@ def save_pdf(client, logo_bytes=None):
         ]))
         return t
 
-    # ── Story ───────────────────────────────────
+    # ── Story ─────────────────────────────────────
     story = []
+    date_str = datetime.now().strftime("%d %B %Y")
 
-    # PAGE LABEL (top-right)
-    story.append(Paragraph("PAGE 01 / 04", sPageLabel))
-    story.append(Spacer(1, 2))
-
-    # Short decorative black rule (top-left)
-    rule = Table([[""]], colWidths=[48], rowHeights=[3])
-    rule.setStyle(TableStyle([("BACKGROUND", (0, 0), (0, 0), BLACK)]))
-    story.append(rule)
-    story.append(Spacer(1, 16))
-
-    # LOGO (if provided)
+    # BRAND HEADER
     if logo_bytes:
         try:
-            img = RLImage(BytesIO(logo_bytes), height=50, width=None)
+            img = RLImage(BytesIO(logo_bytes), height=44, width=None)
             img.hAlign = "LEFT"
             story.append(img)
-            story.append(Spacer(1, 10))
+            story.append(Spacer(1, 6))
         except Exception:
-            pass   # silently skip broken images
+            pass  # skip broken images silently
 
-    # GIANT TITLE
+    story.append(Paragraph("\u25cf POPS", sBrandName))
+    story.append(Paragraph("Smart Proposal Automation", sBrandSub))
+    story.append(Spacer(1, 14))
+    story.append(hr(clr=ACCENT, thick=1.5, sb=0, sa=14))
+
+    # DATE
+    story.append(Paragraph(date_str, sDate))
+    story.append(Spacer(1, 8))
+
+    # TITLE
     story.append(Paragraph("PROJECT PROPOSAL", sTitle))
-
-    # PREPARED FOR + DATE row
-    date_str = datetime.now().strftime("%d %B %Y")
-    hdr = Table(
-        [
-            [Paragraph("PREPARED FOR", sPrepLabel), Paragraph("DATE", sDateLabel)],
-            [Paragraph(client["Name"],  sClientName), Paragraph(date_str, sDateVal)],
-        ],
-        colWidths=[IW * 0.6, IW * 0.4],
-    )
-    hdr.setStyle(TableStyle([
-        ("VALIGN",        (0, 0), (-1, -1), "TOP"),
-        ("TOPPADDING",    (0, 0), (-1, -1), 2),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 0),
-    ]))
-    story.append(hdr)
     story.append(hr())
 
     # OVERVIEW
     story.append(section_heading("Overview"))
+    desc = description.get(project_type, "a tailored digital solution")
     story.append(Paragraph(
-        f"We propose a high-quality {project} solution tailored to your "
-        f"business objectives and delivered within {client['Timeline']}.",
+        f"We are pleased to present this proposal for {desc}. "
+        f"Our team will deliver a scalable, high-quality product within "
+        f"{timeline}, aligned with your business objectives.",
         sBody,
     ))
     story.append(Spacer(1, 6))
     story.append(hr())
 
-    # SCOPE OF WORK — two columns
+    # SCOPE OF WORK
     story.append(section_heading("Scope of Work"))
     story.append(Spacer(1, 6))
 
-    delivs = Deliverables.get(project, [])
+    delivs = Deliverables.get(project_type, [])
     left_col = [Paragraph("CORE DELIVERABLES", sColLabel)]
     for d in delivs:
-        left_col.append(Paragraph(f"\u2014  {d}", sDeliv))
+        left_col.append(Paragraph(f"\u2014\u2002{d}", sDeliv))
 
-    mn, mx = pricing.get(project, ("N/A", "N/A"))
+    mn, mx = pricing.get(project_type, ("N/A", "N/A"))
     right_col = [
         Paragraph("TIMELINE &amp; INVESTMENT", sColLabel),
-        Paragraph("ESTIMATED COMPLETION",      sInvLbl),
-        Paragraph(client["Timeline"],          sInvVal),
-        Paragraph("TOTAL PROJECT VALUE",       sInvLbl),
-        Paragraph(f"Rs. {client['Budget']}",   sInvBig),
-        Paragraph("PRICE RANGE",               sInvLbl),
-        Paragraph(f"Rs. {mn}  \u2013  Rs. {mx}", sInvVal),
+        Paragraph("ESTIMATED COMPLETION",      sInvLabel),
+        Paragraph(timeline,                    sInvVal),
+        Spacer(1, 6),
+        Paragraph("INVESTMENT RANGE",          sInvLabel),
     ]
 
-    # Pad to equal length
+    # Pricing box
+    price_box = Table(
+        [[Paragraph(f"Rs. {mn} \u2013 Rs. {mx}", sInvRange)]],
+        colWidths=[IW * 0.46 - 16],
+    )
+    price_box.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (0, 0), PRICE_BG),
+        ("TOPPADDING",    (0, 0), (0, 0), 10),
+        ("BOTTOMPADDING", (0, 0), (0, 0), 10),
+        ("LEFTPADDING",   (0, 0), (0, 0), 12),
+        ("RIGHTPADDING",  (0, 0), (0, 0), 12),
+    ]))
+    right_col.append(price_box)
+
+    # Pad columns to equal length
     n = max(len(left_col), len(right_col))
     while len(left_col)  < n: left_col.append(Spacer(1, 1))
     while len(right_col) < n: right_col.append(Spacer(1, 1))
 
     scope = Table(
         [[l, r] for l, r in zip(left_col, right_col)],
-        colWidths=[IW * 0.52, IW * 0.48],
+        colWidths=[IW * 0.54, IW * 0.46],
     )
     scope.setStyle(TableStyle([
         ("VALIGN",        (0, 0), (-1, -1), "TOP"),
@@ -256,23 +284,31 @@ def save_pdf(client, logo_bytes=None):
     story.append(Spacer(1, 8))
     story.append(hr())
 
+    # CLOSING NOTE
+    story.append(section_heading("Closing Note"))
+    story.append(Paragraph(CLOSING_NOTE, sClosing))
+    story.append(Spacer(1, 16))
+    story.append(hr())
+
     # SIGNATURE SECTION
-    def sig_col(italic, label, name):
+    def sig_col(label, name):
         return [
-            Paragraph(f"<i>{italic}</i>", sSigItalic),
-            HRFlowable(width="100%", thickness=1, color=BLACK, spaceAfter=6),
+            Paragraph("<i>Digital Signature Recorded</i>", sSigItalic),
+            HRFlowable(width="100%", thickness=0.75, color=BLACK, spaceAfter=5),
             Paragraph(label, sSigLabel),
             Paragraph(name,  sSigName),
         ]
 
-    sl = sig_col("Digital Signature Recorded", "CONSULTANT SIGNATURE",  "Lead Creative Director")
-    sr = sig_col("Digital Signature Recorded", "CLIENT AUTHORIZATION",  "Authorized Representative")
+    sl = sig_col("CONSULTANT SIGNATURE", "Lead Creative Director")
+    sr = sig_col("CLIENT AUTHORIZATION", "Authorized Representative")
     n  = max(len(sl), len(sr))
     while len(sl) < n: sl.append(Spacer(1, 1))
     while len(sr) < n: sr.append(Spacer(1, 1))
 
-    sig = Table([[l, r] for l, r in zip(sl, sr)],
-                colWidths=[IW * 0.5, IW * 0.5])
+    sig = Table(
+        [[l, r] for l, r in zip(sl, sr)],
+        colWidths=[IW * 0.5, IW * 0.5],
+    )
     sig.setStyle(TableStyle([
         ("VALIGN",        (0, 0), (-1, -1), "TOP"),
         ("TOPPADDING",    (0, 0), (-1, -1), 2),
@@ -285,9 +321,9 @@ def save_pdf(client, logo_bytes=None):
 
     # FOOTER
     footer = Table(
-        [[Paragraph("FOLIO EDITOR \u00a9 2025", sFooter),
-          Paragraph("CONFIDENTIAL DOCUMENT",    sFooterR)]],
-        colWidths=[IW * 0.5, IW * 0.5],
+        [[Paragraph("POPS \u00a9 2025  \u2022  Smart Proposal Automation", sFooterL),
+          Paragraph("CONFIDENTIAL DOCUMENT", sFooterR)]],
+        colWidths=[IW * 0.6, IW * 0.4],
     )
     footer.setStyle(TableStyle([
         ("LINEABOVE",     (0, 0), (-1, 0), 0.5, LGREY),
@@ -298,11 +334,11 @@ def save_pdf(client, logo_bytes=None):
     ]))
     story.append(footer)
 
-    # BUILD
+    # BUILD PDF
     doc = SimpleDocTemplate(
-        path, pagesize=A4,
+        pdf_path, pagesize=A4,
         leftMargin=M, rightMargin=M,
         topMargin=M,  bottomMargin=M,
     )
     doc.build(story)
-    return path
+    return pdf_path
