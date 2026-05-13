@@ -171,7 +171,7 @@ with st.sidebar:
     )
     st.markdown("<hr class='sidebar-divider'>", unsafe_allow_html=True)
 
-    name          = st.text_input("Client Name",  placeholder="e.g. Dharani")
+    name          = st.text_input("Client Name",  placeholder="e.g. unaku pudicha peru")
     project_type  = st.selectbox("Project Type",  list(Deliverables.keys()), format_func=str.title)
     timeline      = st.text_input("Timeline",     placeholder="e.g. 3 months")
     pricing_input = st.text_input("Pricing (Rs)", placeholder="e.g. 75,000")
