@@ -96,7 +96,7 @@ with open(txt_path, "w", encoding="utf-8") as file:
     file.write(proposal_text)
 print(f"✅ Text file saved   : {txt_path}")
 
-# Save Word document
+# Save
 docx_path = save_as(client, proposal_text)
 print(f"✅ Word file saved   : {docx_path}")
 
